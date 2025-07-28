@@ -4,16 +4,40 @@ import json
 import argparse
 import torch
 from PIL import Image
-import model_fluxcontrolbeta
+#import model_fluxcontrolbeta
+import model_stablediffusionv2
+import model_kandinsky2
+import model_stablediffusion
+import model_stablediffusionxl
+import model_fluxkontextdev
 
 # Dictionnaire de modèles
-MODELS = {
-    "fluxcontrolbeta": model_fluxcontrolbeta.inpaint,
+MODELS_INPAINT = {
+    #"fluxcontrolbeta": model_fluxcontrolbeta.inpaint,
+    "stablediffusionv2": model_stablediffusionv2.inpaint,
+    "kandinsky": model_kandinsky2.inpaint,
+    "stablediffusion": model_stablediffusion.inpaint,
+    "stablediffusionxl": model_stablediffusionxl.inpaint,
+    "fluxkontextdev": model_fluxkontextdev.inpaint
 }
 
 # Paramètres modèles à logguer
 MODEL_CONFIGS = {
-    "fluxcontrolbeta": {"version": "beta", "source": "FluxControlNet"},
+    #"fluxcontrolbeta": {"version": "beta", "source": "FluxControlNet"},
+    "stablediffusionv2" : {"version": "2.0", "source": "StableDiffusionInpaint"},
+    "kandinsky": {"version": "2.2", "source": "Kandinsky-2.2"},
+    "stablediffusion": {"version": "1.5", "source": "StableDiffusionInpaint"},
+    "stablediffusionxl": {"version": "1.0", "source": "StableDiffusionXL"},
+    "fluxkontextdev": {"version": "1.0", "source": "FLUX-Kontext-dev"}
+}
+
+MODELS_LOAD = {
+    #"fluxcontrolbeta": model_fluxcontrolbeta.load,
+    "stablediffusionv2": model_stablediffusionv2.load,
+    "kandinsky": model_kandinsky2.load,
+    "stablediffusion": model_stablediffusion.load,
+    "stablediffusionxl": model_stablediffusionxl.load,
+    "fluxkontextdev": model_fluxkontextdev.load
 }
 
 def ensure_dir(path):
@@ -40,9 +64,11 @@ def load_local_dataset(csv_file, data_dir):
             dataset.append(sample)
     return dataset
 
-def benchmark_dataset(model_name, model_fn, dataset, result_dir, csv_path, num_samples=1):
+def benchmark_dataset(model_name, inpaint_fn, load_fn, dataset, result_dir, csv_path, num_samples=1):
     ensure_dir(result_dir)
     header = ["model_name", "image", "prompt", "image_generated", "duration_sec", "memory_MB", "model_params"]
+
+    pipe = load_fn()  # Load the model
 
     for i, sample in enumerate(dataset):
         if i >= num_samples:
@@ -52,7 +78,7 @@ def benchmark_dataset(model_name, model_fn, dataset, result_dir, csv_path, num_s
         mask = Image.open(sample["mask_path"]).convert("RGB")
         prompt = sample["prompt"]
         image_name = os.path.basename(sample["image_path"]).split('.')[0]
-        fname = f"{image_name}.png"
+        fname = f"{image_name}_result.png"
 
         mask = mask.convert("L")  # convert to grayscale
         threshold = 253
@@ -67,7 +93,7 @@ def benchmark_dataset(model_name, model_fn, dataset, result_dir, csv_path, num_s
         torch.cuda.synchronize()
         starter.record()
 
-        result, mask = model_fn(image, mask, prompt)
+        result, mask = inpaint_fn(image, mask, prompt, pipe)
 
         ender.record()
         torch.cuda.synchronize()
@@ -82,7 +108,8 @@ def benchmark_dataset(model_name, model_fn, dataset, result_dir, csv_path, num_s
             result = result.permute(1, 2, 0).numpy() * 255
             result = Image.fromarray(result.astype("uint8"))
         result.save(output_path)
-        mask.save(os.path.join(result_dir, f"mask_{fname}"))
+        if mask is not None:
+            mask.save(os.path.join(result_dir, f"mask_{image_name}.png"))
 
         # Log CSV
         row = {
@@ -99,26 +126,31 @@ def benchmark_dataset(model_name, model_fn, dataset, result_dir, csv_path, num_s
         print(f"[{model_name}] {fname} | {duration_ms:.2f} ms | {peak_mem:.2f} MB")
 
 def main():
+    import datetime
+    date_str = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_csv", type=str, default="/fsx/jdelavande/inpaint-benchmark-suite/1_inpainting_benchmark/data/dataset/inpainting_prompts.csv")
     parser.add_argument("--data_dir", type=str, default="/fsx/jdelavande/inpaint-benchmark-suite/1_inpainting_benchmark/data/dataset")
-    parser.add_argument("--output", type=str, default="/fsx/jdelavande/inpaint-benchmark-suite/1_inpainting_benchmark/data/results")
-    parser.add_argument("--csv", type=str, default="/fsx/jdelavande/inpaint-benchmark-suite/1_inpainting_benchmark/data/results/benchmark_log.csv")
-    parser.add_argument("--models", nargs="+", default=["fluxcontrolbeta"])
+    parser.add_argument("--output", type=str, default=f"/fsx/jdelavande/inpaint-benchmark-suite/1_inpainting_benchmark/data/results/{date_str}")
+    parser.add_argument("--csv", type=str, default=f"/fsx/jdelavande/inpaint-benchmark-suite/1_inpainting_benchmark/data/results/{date_str}/benchmark_log.csv")
+    parser.add_argument("--models", nargs="+", default=["fluxkontextdev"])
     parser.add_argument("--num_samples", type=int, default=5)
     args = parser.parse_args()
+
+    # ["fluxcontrolbeta", "stablediffusionv2", "kandinsky", "stablediffusion", "stablediffusionxl", "fluxkontextdev"]
 
     dataset = load_local_dataset(args.dataset_csv, args.data_dir)
 
     for model_name in args.models:
-        if model_name not in MODELS:
-            print(f"⚠️ Modèle inconnu : {model_name}")
+        if model_name not in MODELS_INPAINT:
+            print(f"⚠️ Not known model : {model_name}")
             continue
 
-        print(f"▶ Benchmark du modèle : {model_name}")
+        print(f"▶ Benchmarking model : {model_name}")
         benchmark_dataset(
             model_name=model_name,
-            model_fn=MODELS[model_name],
+            inpaint_fn=MODELS_INPAINT[model_name],
+            load_fn=MODELS_LOAD[model_name],
             dataset=dataset,
             result_dir=os.path.join(args.output, model_name),
             csv_path=args.csv,

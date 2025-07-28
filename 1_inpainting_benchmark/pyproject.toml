@@ -7,7 +7,7 @@ requires-python = ">=3.10"
 dependencies = [
     "accelerate>=1.9.0",
     "datasets>=4.0.0",
-    "diffusers==0.30.2",
+    "diffusers==0.34",
     "hf-transfer>=0.1.9",
     "lpips>=0.1.4",
     "matplotlib>=3.10.3",
@@ -18,4 +18,8 @@ dependencies = [
     "torch>=2.7.1",
     "tqdm>=4.67.1",
     "transformers>=4.54.0",
+    "xformers>=0.0.31.post1",
 ]
+
+[tool.uv.sources]
+diffusers = { git = "https://github.com/huggingface/diffusers.git" }

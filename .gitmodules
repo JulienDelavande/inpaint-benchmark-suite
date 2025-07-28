@@ -1,3 +1,12 @@
 [submodule "1_inpainting_benchmark/scripts/flux_controlnet"]
 	path = 1_inpainting_benchmark/scripts/flux_controlnet
 	url = https://github.com/alimama-creative/FLUX-Controlnet-Inpainting.git
+[submodule "comfyui"]
+	path = comfyui
+	url = git@github.com:comfyanonymous/ComfyUI.git
+[submodule "2_comfy_runner/2_comfy_runner/comfyui"]
+	path = 2_comfy_runner/2_comfy_runner/comfyui
+	url = git@github.com:comfyanonymous/ComfyUI.git
+[submodule "2_comfy_runner/comfyapi"]
+	path = 2_comfy_runner/comfyapi
+	url = https://github.com/9elements/comfyui-api.git

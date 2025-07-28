@@ -1,6 +1,6 @@
 image_path,mask_path,prompt
-bed.png,bad_mask.png,"add a dog lying on the bed"
-kitchen.png,kitchen_mask.png,"add a pie on the kitchen counter"
-sofa.png,sofa_mask.png,"add a person sitting on the sofa"
-table.png,table_mask.png,"remove the chair from the scene"
-washingmachine.png,washingmachine_mask.png,"put some clothes inside the washing machine"
+bed.png,bed_mask2.png,"add a dog lying on the bed"
+kitchen.png,kitchen_mask2.png,"add a pie on the kitchen counter"
+sofa.png,sofa_mask2.png,"add a person sitting on the sofa"
+table.png,table_mask2.png,"remove the front chair from the scene"
+washingmachine.png,washingmachine_mask2.png,"put some clothes inside the washing machine"
