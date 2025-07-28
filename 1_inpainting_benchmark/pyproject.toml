@@ -5,11 +5,16 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "diffusers>=0.34.0",
+    "accelerate>=1.9.0",
+    "datasets>=4.0.0",
+    "diffusers==0.30.2",
+    "hf-transfer>=0.1.9",
     "lpips>=0.1.4",
     "matplotlib>=3.10.3",
     "opencv-python>=4.12.0.88",
     "pillow>=11.3.0",
+    "protobuf>=6.31.1",
+    "sentencepiece>=0.2.0",
     "torch>=2.7.1",
     "tqdm>=4.67.1",
     "transformers>=4.54.0",
