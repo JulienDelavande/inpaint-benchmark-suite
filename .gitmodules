@@ -1,0 +1,3 @@
+[submodule "1_inpainting_benchmark/scripts/flux_controlnet"]
+	path = 1_inpainting_benchmark/scripts/flux_controlnet
+	url = https://github.com/alimama-creative/FLUX-Controlnet-Inpainting.git
