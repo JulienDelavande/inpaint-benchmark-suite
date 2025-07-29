@@ -67,7 +67,6 @@ def inpaint(image, mask, prompt, pipe):
     return result, mask
 
 if __name__ == "__main__":
-    # Exemple d'utilisation
     image_path = "/fsx/jdelavande/inpaint-benchmark-suite/1_inpainting_benchmark/scripts/flux_controlnet/images/bucket.png"
     mask_path = "/fsx/jdelavande/inpaint-benchmark-suite/1_inpainting_benchmark/scripts/flux_controlnet/images/mask_bucket.png"
     prompt = "a person wearing a white shoe, carrying a white bucket with text 'FLUX' on it"
@@ -75,7 +74,7 @@ if __name__ == "__main__":
     image = load_image(image_path)
     mask = load_image(mask_path)
 
-    load()  # Load the model
-    result_image = inpaint(image, mask, prompt)
+    pipe = load()
+    result_image = inpaint(image, mask, prompt, pipe)
     result_image.save("flux_inpaint_result.png")
     print("Inpainting completed and saved as 'flux_inpaint_result.png'")

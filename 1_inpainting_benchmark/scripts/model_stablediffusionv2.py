@@ -48,6 +48,7 @@ if __name__ == "__main__":
     image = load_image(image_path)
     mask = load_image(mask_path)
 
-    result_image, _ = inpaint(image, mask, prompt)
+    pipe = load()
+    result_image, _ = inpaint(image, mask, prompt, pipe)
     result_image.save("/fsx/jdelavande/inpaint-benchmark-suite/1_inpainting_benchmark/data/results/sd2_inpaint_result.png")
     print("Inpainting completed and saved as 'sd2_inpaint_result.png'")
