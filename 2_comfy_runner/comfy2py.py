@@ -6,7 +6,7 @@ import os
 import time
 
 COMFY_API_URL = "http://127.0.0.1:8188"
-WORKFLOW_FILE = "workflow_api.json"  # le fichier JSON exporté depuis ComfyUI en format API
+WORKFLOW_FILE = "workflow_api.json" 
 
 def load_workflow():
     with open(WORKFLOW_FILE, "r") as f:
